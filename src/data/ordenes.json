@@ -1,0 +1,17 @@
+[
+  {
+    "id": "89c6cfbb-a14c-4f3f-b948-27757db268e5",
+    "userId": "9622f7cc-f2c8-471b-8d43-87abe1abf4fb",
+    "items": [
+      {
+        "productId": 2,
+        "name": "Instalación de Office",
+        "price": 150,
+        "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=1000",
+        "quantity": 1
+      }
+    ],
+    "total": 150,
+    "date": "2025-12-02T07:29:44.652Z"
+  }
+]

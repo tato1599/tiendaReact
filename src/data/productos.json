@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "name": "Formateo y Limpieza",
+        "description": "Limpieza profunda de virus, optimización del sistema y actualización de drivers.",
+        "price": 350.00,
+        "category": "Software Installation",
+        "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&q=80&w=1000"
+    },
+    {
+        "id": 2,
+        "name": "Instalación de Office",
+        "description": "Licencia original de Microsoft Office 365 y configuración completa.",
+        "price": 150.00,
+        "category": "Software Installation",
+        "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=1000"
+    },
+    {
+        "id": 3,
+        "name": "Reparación de Pantalla",
+        "description": "Cambio de display para laptops de todas las marcas.",
+        "price": 1200.00,
+        "category": "Hardware Repair",
+        "image": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&q=80&w=1000"
+    },
+    {
+        "id": 4,
+        "name": "Desarrollo Web Básico",
+        "description": "Landing page responsiva y moderna para tu negocio.",
+        "price": 2500.00,
+        "category": "Web Development",
+        "image": "https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&q=80&w=1000"
+    },
+    {
+        "id": 5,
+        "name": "Soporte Remoto",
+        "description": "Ayuda técnica inmediata vía TeamViewer o AnyDesk.",
+        "price": 200.00,
+        "category": "Technical Support",
+        "image": "https://images.unsplash.com/photo-1515378960530-7c0da6231fb1?auto=format&fit=crop&q=80&w=1000"
+    },
+    {
+        "id": 6,
+        "name": "Instalación de Windows",
+        "description": "Instalación de Windows 11 o 10.",
+        "price": 500.00,
+        "category": "Software Installation",
+        "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&q=80&w=1000"
+    }
+]
