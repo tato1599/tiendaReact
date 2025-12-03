@@ -1,1 +1,222 @@
-The content has been copied to your clipboard. Please paste it here to complete the file creation.
+{
+  "repo_notes": [
+    {
+      "content": "Documentación generada para el proyecto ITCJ SERVICIOS, una tienda en línea desarrollada con React y Vite."
+    }
+  ],
+  "pages": [
+    {
+      "title": "Visión General",
+      "purpose": "Introducir ITCJ SERVICIOS - Tienda en Línea, explicando qué hace la aplicación, sus características principales y su caso de uso como plataforma de comercio electrónico para servicios.",
+      "page_notes": [
+        {
+          "content": "ITCJ SERVICIOS es una aplicación web de comercio electrónico diseñada para gestionar y ofrecer servicios y productos del Instituto Tecnológico de Ciudad Juárez. La plataforma permite a los usuarios navegar por un catálogo de servicios, gestionar un carrito de compras, realizar pedidos y contactar a la institución. El proyecto destaca por su arquitectura moderna basada en React, diseño responsivo con Tailwind CSS y un sistema de persistencia de datos híbrido (localStorage + sistema de archivos)."
+        }
+      ]
+    },
+    {
+      "title": "Comenzando",
+      "purpose": "Proporcionar instrucciones de configuración, incluyendo clonación del repositorio, instalación de dependencias, ejecución del servidor de desarrollo y construcción para producción.",
+      "page_notes": [
+        {
+          "content": "Para poner en marcha el proyecto localmente:\n\n1. **Clonar el repositorio**:\n   `git clone <url-del-repo>`\n\n2. **Instalar dependencias**:\n   Navega a la carpeta del proyecto y ejecuta:\n   `npm install`\n\n3. **Ejecutar servidor de desarrollo**:\n   `npm run dev`\n   La aplicación estará disponible en `http://localhost:5173`.\n\n4. **Construir para producción**:\n   `npm run build`\n   Esto generará los archivos estáticos en la carpeta `dist`."
+        }
+      ]
+    },
+    {
+      "title": "Arquitectura",
+      "purpose": "Presentar la visión general arquitectónica de alto nivel de la aplicación, explicando la estructura en capas y los componentes principales del sistema.",
+      "page_notes": [
+        {
+          "content": "La aplicación sigue una arquitectura de Single Page Application (SPA) construida con React y Vite. Se estructura en capas claras:\n- **Capa de Presentación**: Componentes React y páginas en `src/components` y `src/pages`.\n- **Capa de Estado**: Context API (`src/context`) para el manejo global de sesión y carrito.\n- **Capa de Datos**: Módulo de utilidad `bd.js` en `src/utils` que actúa como interfaz para la manipulación de datos.\n- **Capa de Persistencia**: Archivos JSON en `src/data` gestionados a través de un middleware personalizado de Vite para escritura en disco."
+        }
+      ]
+    },
+    {
+      "title": "Inicialización de la Aplicación",
+      "purpose": "Explicar cómo se inicializa la aplicación, desde el punto de entrada HTML hasta el montaje de React y la inicialización de la base de datos.",
+      "parent": "Arquitectura",
+      "page_notes": [
+        {
+          "content": "El flujo de inicio es el siguiente:\n1. `index.html`: Punto de entrada que carga el script `src/main.jsx`.\n2. `main.jsx`: Monta el componente raíz `App` en el DOM. Aquí también se llama a `bd.iniciarBD()` para asegurar que los archivos JSON base (usuarios, productos, etc.) estén cargados en el localStorage si es la primera ejecución.\n3. `App.jsx`: Configura los Proveedores de Contexto (`ProveedorAutenticacion`, `ProveedorCarrito`) y el Enrutador (`Router`) para envolver la aplicación."
+        }
+      ]
+    },
+    {
+      "title": "Sistema de Enrutamiento",
+      "purpose": "Documentar la configuración de React Router, definiciones de rutas y cómo se implementa la navegación del lado del cliente en toda la aplicación.",
+      "parent": "Arquitectura",
+      "page_notes": [
+        {
+          "content": "Se utiliza `react-router-dom` para la navegación. Las rutas están definidas en `App.jsx` dentro del componente `<Routes>`:\n- `/`: Página de Inicio.\n- `/servicios`: Catálogo de servicios.\n- `/servicios/:id`: Detalle de producto individual.\n- `/carrito`: Vista del carrito de compras.\n- `/iniciar-sesion` y `/registro`: Autenticación.\n- `/quienes-somos`: Información institucional.\n- `/ubicacion-contacto`: Mapa y formulario de contacto.\n\nLa navegación se realiza mediante el componente `<Link>` para evitar recargas de página completas."
+        }
+      ]
+    },
+    {
+      "title": "Gestión de Estado Global",
+      "purpose": "Explicar la implementación de Context API para gestionar la autenticación y el estado del carrito de compras en toda la aplicación.",
+      "parent": "Arquitectura",
+      "page_notes": [
+        {
+          "content": "La aplicación utiliza dos contextos principales:\n1. **ContextoAutenticacion**: Gestiona el estado del usuario (logueado/no logueado), almacena la información del usuario actual y provee funciones para `iniciarSesion`, `registrarse` y `cerrarSesion`.\n2. **ContextoCarrito**: Gestiona la lista de productos en el carrito. Se sincroniza con la base de datos simulada y provee funciones como `agregarAlCarrito`, `eliminarDelCarrito`, `vaciarCarrito` y `crearOrden`. Este contexto depende del estado de autenticación para cargar el carrito específico del usuario."
+        }
+      ]
+    },
+    {
+      "title": "Capa de Persistencia de Datos",
+      "purpose": "Detallar el módulo de utilidad bd.js, su estrategia de doble persistencia usando localStorage y almacenamiento basado en archivos vía middleware de Vite, y los patrones de acceso a datos.",
+      "parent": "Arquitectura",
+      "page_notes": [
+        {
+          "content": "El archivo `src/utils/bd.js` centraliza todas las operaciones de datos. Implementa una estrategia híbrida:\n- **Lectura**: Lee principalmente de `localStorage` para velocidad inmediata.\n- **Escritura**: Escribe tanto en `localStorage` (para actualización UI inmediata) como en los archivos físicos JSON en `src/data/`.\n- **Middleware de Vite**: Se configuró un plugin personalizado en `vite.config.js` que expone un endpoint `/api/save`. `bd.js` hace peticiones POST a este endpoint para escribir cambios permanentemente en los archivos JSON del servidor de desarrollo."
+        }
+      ]
+    },
+    {
+      "title": "Características Principales",
+      "purpose": "Visión general de las principales capacidades funcionales de la aplicación, incluyendo autenticación, compras y pedidos.",
+      "page_notes": [
+        {
+          "content": "Las funcionalidades núcleo permiten un flujo completo de e-commerce: Los usuarios pueden registrarse, explorar productos, añadirlos a un carrito persistente y finalizar la compra generando una orden. Además, existen módulos informativos y de contacto totalmente funcionales."
+        }
+      ]
+    },
+    {
+      "title": "Autenticación de Usuario",
+      "purpose": "Documentar los flujos de inicio de sesión y registro, gestión de sesiones con localStorage y cómo se comparte el estado de autenticación entre componentes.",
+      "parent": "Características Principales",
+      "page_notes": [
+        {
+          "content": "El sistema de autenticación simula un backend real:\n- **Registro**: Crea un nuevo usuario con ID único (UUID) y lo guarda en `usuarios.json`.\n- **Login**: Valida credenciales contra los datos almacenados. Si es exitoso, guarda un token simulado y datos del usuario en localStorage.\n- **Persistencia**: Al recargar la página, `ContextoAutenticacion` verifica el localStorage para restaurar la sesión automáticamente."
+        }
+      ]
+    },
+    {
+      "title": "Catálogo de Productos",
+      "purpose": "Explicar cómo se cargan los productos, se muestran en el listado de servicios y cómo funcionan las páginas de detalle de producto individual.",
+      "parent": "Características Principales",
+      "page_notes": [
+        {
+          "content": "Los productos se leen de `src/data/productos.json`.\n- **Vista de Servicios**: Muestra una rejilla (grid) de tarjetas de productos con imagen, nombre, precio y botón rápido de agregar al carrito.\n- **Detalle de Producto**: Ruta dinámica `/servicios/:id` que busca el producto específico por ID y muestra información extendida y controles de cantidad."
+        }
+      ]
+    },
+    {
+      "title": "Carrito de Compras",
+      "purpose": "Documentar la gestión del carrito incluyendo agregar artículos, eliminar artículos, vaciar el carrito y cómo se persiste el estado del carrito por usuario.",
+      "parent": "Características Principales",
+      "page_notes": [
+        {
+          "content": "El carrito es persistente y único por usuario. Se almacena en `carritos.json` vinculado al `userId`.\n- **Lógica**: `bd.js` maneja la lógica de buscar si el usuario ya tiene un carrito, si el producto ya existe en él (para sumar cantidad) o si es nuevo.\n- **UI**: La página `/carrito` lista los ítems, permite eliminar productos individualmente y muestra el total calculado dinámicamente."
+        }
+      ]
+    },
+    {
+      "title": "Gestión de Órdenes",
+      "purpose": "Explicar el proceso de creación de órdenes, cómo los contenidos del carrito se convierten en órdenes y la persistencia de datos de órdenes.",
+      "parent": "Características Principales",
+      "page_notes": [
+        {
+          "content": "Al finalizar la compra:\n1. Se llama a `bd.crearOrden(usuarioId)`.\n2. Se copian los ítems actuales del carrito a una nueva estructura de orden en `ordenes.json` con fecha y total.\n3. Se vacía el carrito del usuario en `carritos.json`.\n4. Se retorna la confirmación de la orden al usuario."
+        }
+      ]
+    },
+    {
+      "title": "Sistema de Formulario de Contacto",
+      "purpose": "Documentar la implementación del formulario de contacto incluyendo validación, manejo de eventos y persistencia de comentarios.",
+      "parent": "Características Principales",
+      "page_notes": [
+        {
+          "content": "Ubicado en `UbicacionContacto.jsx`.\n- **Validación**: Verifica campos vacíos y formato de email antes de enviar.\n- **Eventos**: Implementa handlers para `onFocus`, `onBlur`, `onChange`, `onClick`, `onMouseOver`, `onMouseOut` para interactividad y cumplimiento de requisitos.\n- **Persistencia**: Usa `bd.guardarComentario()` para escribir los mensajes recibidos en `src/data/comentarios.json` con fecha y ID único."
+        }
+      ]
+    },
+    {
+      "title": "Interfaz de Usuario",
+      "purpose": "Visión general de la estructura de componentes UI, patrones de diseño y organización de la capa de presentación.",
+      "page_notes": [
+        {
+          "content": "La UI está construida con componentes funcionales de React y estilizada con Tailwind CSS. Se prioriza un diseño limpio, moderno y responsivo (Mobile First)."
+        }
+      ]
+    },
+    {
+      "title": "Componentes de Diseño (Layout)",
+      "purpose": "Documentar los componentes de diseño persistentes (barra de navegación y pie de página) que aparecen en todas las páginas.",
+      "parent": "Interfaz de Usuario",
+      "page_notes": [
+        {
+          "content": "- **BarraNavegacion**: Componente responsivo. En escritorio muestra menú horizontal; en móvil, menú de hamburguesa. Incluye lógica de cambio de tema (Claro/Oscuro), indicador de ítems en carrito y menú de perfil de usuario.\n- **Footer**: Pie de página informativo con enlaces rápidos a las secciones principales y derechos de autor."
+        }
+      ]
+    },
+    {
+      "title": "Componentes de Página",
+      "purpose": "Detallar los componentes de página individuales incluyendo la página Acerca de, página de Contacto y su estructura.",
+      "parent": "Interfaz de Usuario",
+      "page_notes": [
+        {
+          "content": "- **QuienesSomos**: Presenta Misión, Visión e Historia en un diseño de tarjetas y texto.\n- **UbicacionContacto**: Diseño de dos columnas. Izquierda: Información de contacto y mapa de Google Maps (iframe). Derecha: Formulario interactivo.\n- **PaginaInicio**: Landing page con Hero section y destacados."
+        }
+      ]
+    },
+    {
+      "title": "Estilos y Temas",
+      "purpose": "Explicar la integración de Tailwind CSS, implementación del modo oscuro y enfoque general de estilo.",
+      "parent": "Interfaz de Usuario",
+      "page_notes": [
+        {
+          "content": "Se utiliza **Tailwind CSS** para todos los estilos.\n- **Modo Oscuro**: Implementado mediante la clase `dark` en el elemento `html`. El estado se persiste en localStorage. Los componentes usan prefijos `dark:` (ej. `dark:bg-gray-800`) para adaptar sus colores automáticamente."
+        }
+      ]
+    },
+    {
+      "title": "Modelo de Datos",
+      "purpose": "Documentar las estructuras de datos JSON para usuarios, productos, carritos, órdenes y comentarios, incluyendo sus esquemas y relaciones.",
+      "page_notes": [
+        {
+          "content": "Los datos se almacenan en JSON:\n- **Usuarios**: `{ id, name, email, password }`\n- **Productos**: `{ id, name, description, price, image, category }`\n- **Carritos**: `{ userId, items: [{ productId, quantity, ... }] }`\n- **Órdenes**: `{ id, userId, items: [], total, date }`\n- **Comentarios**: `{ id, nombre, email, comentarios, fecha }`"
+        }
+      ]
+    },
+    {
+      "title": "Guía de Desarrollo",
+      "purpose": "Proporcionar información para desarrolladores incluyendo configuración de construcción, herramientas y flujos de trabajo de desarrollo.",
+      "page_notes": [
+        {
+          "content": "El proyecto utiliza `npm` para gestión de paquetes. Scripts principales:\n- `dev`: Inicia servidor Vite.\n- `build`: Genera bundle de producción.\n- `lint`: Ejecuta ESLint."
+        }
+      ]
+    },
+    {
+      "title": "Sistema de Construcción",
+      "purpose": "Explicar la configuración de construcción de Vite, servidor de desarrollo y proceso de construcción de producción.",
+      "parent": "Guía de Desarrollo",
+      "page_notes": [
+        {
+          "content": "Vite está configurado en `vite.config.js`. Incluye:\n- `@vitejs/plugin-react`: Para soporte de React.\n- **Plugin personalizado 'fs-persistence'**: Middleware que intercepta peticiones POST a `/api/save` para escribir archivos JSON en el sistema de archivos local durante el desarrollo."
+        }
+      ]
+    },
+    {
+      "title": "Herramientas de Calidad de Código",
+      "purpose": "Documentar la configuración de ESLint, reglas de linting específicas de React y estándares de calidad de código.",
+      "parent": "Guía de Desarrollo",
+      "page_notes": [
+        {
+          "content": "Se utiliza ESLint con configuración plana (`eslint.config.js`). Incluye reglas recomendadas para JS, React, React Hooks y React Refresh para asegurar buenas prácticas y prevenir errores comunes."
+        }
+      ]
+    },
+    {
+      "title": "Stack Tecnológico",
+      "purpose": "Detallar el stack tecnológico completo incluyendo React, React Router, Tailwind CSS y todas las dependencias principales.",
+      "parent": "Guía de Desarrollo",
+      "page_notes": [
+        {
+          "content": "- **Frontend**: React 19, ReactDOM.\n- **Build Tool**: Vite.\n- **Estilos**: Tailwind CSS, PostCSS, Autoprefixer.\n- **Routing**: React Router DOM v7.\n- **Utilidades**: uuid (generación de IDs).\n- **Linting**: ESLint, Globals."
+        }
+      ]
+    }
+  ]
+}
