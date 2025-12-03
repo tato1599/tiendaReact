@@ -2,20 +2,23 @@ import datosUsuarios from '../data/usuarios.json';
 import datosProductos from '../data/productos.json';
 import datosCarritos from '../data/carritos.json';
 import datosOrdenes from '../data/ordenes.json';
+import datosComentarios from '../data/comentarios.json';
 import { v4 as uuidv4 } from 'uuid';
 
 const CLAVES_BD = {
     USUARIOS: 'bd_usuarios',
     PRODUCTOS: 'bd_productos',
     CARRITOS: 'bd_carritos',
-    ORDENES: 'bd_ordenes'
+    ORDENES: 'bd_ordenes',
+    COMENTARIOS: 'bd_comentarios'
 };
 
 const ARCHIVOS = {
     [CLAVES_BD.USUARIOS]: 'usuarios.json',
     [CLAVES_BD.PRODUCTOS]: 'productos.json',
     [CLAVES_BD.CARRITOS]: 'carritos.json',
-    [CLAVES_BD.ORDENES]: 'ordenes.json'
+    [CLAVES_BD.ORDENES]: 'ordenes.json',
+    [CLAVES_BD.COMENTARIOS]: 'comentarios.json'
 };
 
 // Ayudante para guardar en el sistema de archivos vía middleware de Vite
@@ -49,6 +52,9 @@ const iniciarBD = () => {
     }
     if (!localStorage.getItem(CLAVES_BD.ORDENES)) {
         localStorage.setItem(CLAVES_BD.ORDENES, JSON.stringify(datosOrdenes));
+    }
+    if (!localStorage.getItem(CLAVES_BD.COMENTARIOS)) {
+        localStorage.setItem(CLAVES_BD.COMENTARIOS, JSON.stringify(datosComentarios));
     }
 };
 
@@ -185,5 +191,14 @@ export const bd = {
     obtenerOrdenes: async (usuarioId) => {
         const ordenes = obtener(CLAVES_BD.ORDENES);
         return ordenes.filter(o => o.userId === usuarioId);
+    },
+
+    // Comentarios
+    guardarComentario: async (comentario) => {
+        const comentarios = obtener(CLAVES_BD.COMENTARIOS);
+        const nuevoComentario = { ...comentario, id: uuidv4(), fecha: new Date().toISOString() };
+        comentarios.push(nuevoComentario);
+        establecer(CLAVES_BD.COMENTARIOS, comentarios);
+        return nuevoComentario;
     }
 };

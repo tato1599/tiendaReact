@@ -64,6 +64,16 @@ const BarraNavegacion = () => {
                                                 Servicios
                                             </Link>
                                         </li>
+                                        <li>
+                                            <Link to="/quienes-somos" className="block text-sm font-medium text-gray-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-500">
+                                                Quiénes Somos
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/ubicacion-contacto" className="block text-sm font-medium text-gray-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-500">
+                                                Contacto
+                                            </Link>
+                                        </li>
                                     </ul>
                                 </div>
 
@@ -73,6 +83,8 @@ const BarraNavegacion = () => {
                                         <ul className="flex flex-col gap-4">
                                             <li><Link to="/" className="text-gray-900 dark:text-white font-medium" onClick={() => setMenuAbierto(false)}>Inicio</Link></li>
                                             <li><Link to="/servicios" className="text-gray-900 dark:text-white font-medium" onClick={() => setMenuAbierto(false)}>Servicios</Link></li>
+                                            <li><Link to="/quienes-somos" className="text-gray-900 dark:text-white font-medium" onClick={() => setMenuAbierto(false)}>Quiénes Somos</Link></li>
+                                            <li><Link to="/ubicacion-contacto" className="text-gray-900 dark:text-white font-medium" onClick={() => setMenuAbierto(false)}>Contacto</Link></li>
 
                                             {estaAutenticado && (
                                                 <>
