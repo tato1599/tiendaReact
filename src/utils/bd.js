@@ -1,250 +1,115 @@
-import datosUsuarios from '../data/usuarios.json';
-import datosProductos from '../data/productos.json';
-import datosCarritos from '../data/carritos.json';
-import datosOrdenes from '../data/ordenes.json';
-import datosComentarios from '../data/comentarios.json';
 import { v4 as uuidv4 } from 'uuid';
 
-const CLAVES_BD = {
-    USUARIOS: 'bd_usuarios',
-    PRODUCTOS: 'bd_productos',
-    CARRITOS: 'bd_carritos',
-    ORDENES: 'bd_ordenes',
-    COMENTARIOS: 'bd_comentarios'
-};
+const API_BASE = 'http://localhost:8000/api';
 
-const ARCHIVOS = {
-    [CLAVES_BD.USUARIOS]: 'usuarios.json',
-    [CLAVES_BD.PRODUCTOS]: 'productos.json',
-    [CLAVES_BD.CARRITOS]: 'carritos.json',
-    [CLAVES_BD.ORDENES]: 'ordenes.json',
-    [CLAVES_BD.COMENTARIOS]: 'comentarios.json'
-};
-
-// Ayudante para guardar en el sistema de archivos vía middleware de Vite
-const guardarEnArchivo = async (clave, datos) => {
-    try {
-        await fetch('/api/save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                file: ARCHIVOS[clave],
-                data: datos
-            })
-        });
-    } catch (error) {
-        console.error('Error guardando en archivo:', error);
+const handleResponse = async (response) => {
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Error en la petición');
     }
-};
-
-// Inicializar BD desde archivos JSON
-const iniciarBD = () => {
-    // Siempre recargar productos del JSON para tomar ediciones manuales
-    localStorage.setItem(CLAVES_BD.PRODUCTOS, JSON.stringify(datosProductos));
-
-    if (!localStorage.getItem(CLAVES_BD.USUARIOS)) {
-        localStorage.setItem(CLAVES_BD.USUARIOS, JSON.stringify(datosUsuarios));
-    }
-    if (!localStorage.getItem(CLAVES_BD.CARRITOS)) {
-        localStorage.setItem(CLAVES_BD.CARRITOS, JSON.stringify(datosCarritos));
-    }
-    if (!localStorage.getItem(CLAVES_BD.ORDENES)) {
-        localStorage.setItem(CLAVES_BD.ORDENES, JSON.stringify(datosOrdenes));
-    }
-    if (!localStorage.getItem(CLAVES_BD.COMENTARIOS)) {
-        localStorage.setItem(CLAVES_BD.COMENTARIOS, JSON.stringify(datosComentarios));
-    }
-};
-
-const obtener = (clave) => {
-    try {
-        return JSON.parse(localStorage.getItem(clave) || '[]');
-    } catch (e) {
-        console.error(`Error parsing localStorage key "${clave}":`, e);
-        return [];
-    }
-};
-const establecer = (clave, datos) => {
-    localStorage.setItem(clave, JSON.stringify(datos));
-    guardarEnArchivo(clave, datos);
+    return response.json();
 };
 
 export const bd = {
-    iniciarBD: iniciarBD,
+    iniciarBD: () => {
+        // Ya no es necesario inicializar localstorage
+        console.log('Sistema conectado a BD MySQL vía API PHP');
+    },
 
     // Autenticación
     iniciarSesion: async (email, password) => {
-        const usuarios = obtener(CLAVES_BD.USUARIOS);
-        const usuario = usuarios.find(u => u.email === email && u.password === password);
-        if (!usuario) throw new Error('Credenciales inválidas');
-        return { token: 'fake-jwt-token', user: { id: usuario.id, name: usuario.name, email: usuario.email } };
+        const response = await fetch(`${API_BASE}/usuarios.php?action=login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        return handleResponse(response);
     },
 
     registrarse: async (name, email, password) => {
-        const usuarios = obtener(CLAVES_BD.USUARIOS);
-        if (usuarios.find(u => u.email === email)) throw new Error('El usuario ya existe');
-
-        const nuevoUsuario = { id: uuidv4(), name, email, password };
-        usuarios.push(nuevoUsuario);
-        establecer(CLAVES_BD.USUARIOS, usuarios);
-
-        return { token: 'fake-jwt-token', user: { id: nuevoUsuario.id, name: nuevoUsuario.name, email: nuevoUsuario.email } };
+        const response = await fetch(`${API_BASE}/usuarios.php?action=register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: uuidv4(),
+                name,
+                email,
+                password
+            })
+        });
+        return handleResponse(response);
     },
 
     // Productos
     obtenerProductos: async () => {
-        return obtener(CLAVES_BD.PRODUCTOS);
+        const response = await fetch(`${API_BASE}/productos.php`);
+        return handleResponse(response);
     },
 
     obtenerProductoPorId: async (id) => {
-        const productos = obtener(CLAVES_BD.PRODUCTOS);
-        return productos.find(p => p.id === parseInt(id));
+        const response = await fetch(`${API_BASE}/productos.php?id=${id}`);
+        return handleResponse(response);
     },
 
     // Carrito
     obtenerCarrito: async (usuarioId) => {
-        const carritos = obtener(CLAVES_BD.CARRITOS);
-        let carrito = carritos.find(c => c.userId === usuarioId);
-        if (!carrito) {
-            carrito = { userId: usuarioId, items: [] };
-            carritos.push(carrito);
-            establecer(CLAVES_BD.CARRITOS, carritos);
-        }
-        return carrito.items;
+        const response = await fetch(`${API_BASE}/carritos.php?userId=${usuarioId}`);
+        return handleResponse(response);
     },
 
     agregarAlCarrito: async (usuarioId, productoId, cantidad) => {
-        const productos = obtener(CLAVES_BD.PRODUCTOS);
-        const producto = productos.find(p => p.id === parseInt(productoId));
-        if (!producto) throw new Error('Producto no encontrado');
-
-        const carritos = obtener(CLAVES_BD.CARRITOS);
-        let carrito = carritos.find(c => c.userId === usuarioId);
-        if (!carrito) {
-            carrito = { userId: usuarioId, items: [] };
-            carritos.push(carrito);
-        }
-
-        const itemExistente = carrito.items.find(item => item.productId === parseInt(productoId));
-        if (itemExistente) {
-            itemExistente.quantity += cantidad;
-        } else {
-            carrito.items.push({
-                productId: parseInt(productoId),
-                name: producto.name,
-                price: producto.price,
-                image: producto.image,
+        const response = await fetch(`${API_BASE}/carritos.php?action=add&userId=${usuarioId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                productId,
                 quantity: cantidad
-            });
-        }
-        establecer(CLAVES_BD.CARRITOS, carritos);
-        return carrito.items;
+            })
+        });
+        return handleResponse(response);
     },
 
     eliminarDelCarrito: async (usuarioId, productoId) => {
-        const carritos = obtener(CLAVES_BD.CARRITOS);
-        const carrito = carritos.find(c => c.userId === usuarioId);
-        if (carrito) {
-            carrito.items = carrito.items.filter(item => item.productId !== parseInt(productoId));
-            establecer(CLAVES_BD.CARRITOS, carritos);
-            return carrito.items;
-        }
-        return [];
+        const response = await fetch(`${API_BASE}/carritos.php?userId=${usuarioId}&productId=${productoId}`, {
+            method: 'DELETE'
+        });
+        return handleResponse(response);
     },
 
     vaciarCarrito: async (usuarioId) => {
-        const carritos = obtener(CLAVES_BD.CARRITOS);
-        const carrito = carritos.find(c => c.userId === usuarioId);
-        if (carrito) {
-            carrito.items = [];
-            establecer(CLAVES_BD.CARRITOS, carritos);
-            return [];
-        }
-        return [];
+        const response = await fetch(`${API_BASE}/carritos.php?action=clear&userId=${usuarioId}`, {
+            method: 'POST'
+        });
+        return handleResponse(response);
     },
 
     // Ordenes
     crearOrden: async (usuarioId) => {
-        const carritos = obtener(CLAVES_BD.CARRITOS);
-        const carrito = carritos.find(c => c.userId === usuarioId);
-        if (!carrito || carrito.items.length === 0) throw new Error('El carrito está vacío');
-
-        const ordenes = obtener(CLAVES_BD.ORDENES);
-        const nuevaOrden = {
-            id: uuidv4(),
-            userId: usuarioId,
-            items: [...carrito.items],
-            total: carrito.items.reduce((acc, item) => acc + item.price * item.quantity, 0),
-            date: new Date().toISOString()
-        };
-        ordenes.push(nuevaOrden);
-        establecer(CLAVES_BD.ORDENES, ordenes);
-
-        carrito.items = [];
-        establecer(CLAVES_BD.CARRITOS, carritos);
-
-        return nuevaOrden;
+        const response = await fetch(`${API_BASE}/ordenes.php?userId=${usuarioId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: uuidv4()
+            })
+        });
+        return handleResponse(response);
     },
 
     obtenerOrdenes: async (usuarioId) => {
-        const ordenes = obtener(CLAVES_BD.ORDENES);
-        return ordenes.filter(o => o.userId === usuarioId);
+        const response = await fetch(`${API_BASE}/ordenes.php?userId=${usuarioId}`);
+        return handleResponse(response);
     },
 
     // Comentarios
-    // Comentarios
     guardarComentario: async (comentario) => {
-        // Opción 1: Guardar localmente (Original)
-        /*
-        const comentarios = obtener(CLAVES_BD.COMENTARIOS);
-        const nuevoComentario = { ...comentario, id: uuidv4(), fecha: new Date().toISOString() };
-        comentarios.push(nuevoComentario);
-        establecer(CLAVES_BD.COMENTARIOS, comentarios);
-        return nuevoComentario;
-        */
-
-        // Opción 2: Conexión con Backend PHP (Base de Datos MySQL)
-        // Asegúrate de que tu servidor PHP esté corriendo y la ruta sea correcta.
-        // Ejemplo: http://localhost/tiendaReact/tienda/backend/guardar_contacto.php
-        // O si usas el servidor interno de PHP en el puerto 8000: http://localhost:8000/guardar_contacto.php
-
-        try {
-            const response = await fetch('http://localhost:8000/guardar_contacto.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(comentario)
-            });
-
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                return data;
-            } else {
-                // Si falla el servidor, lanzar error o usar fallback
-                console.warn('Error del backend PHP:', data.message);
-                // Fallback a local si se desea:
-                const comentarios = obtener(CLAVES_BD.COMENTARIOS);
-                const nuevoComentario = { ...comentario, id: uuidv4(), fecha: new Date().toISOString() };
-                comentarios.push(nuevoComentario);
-                establecer(CLAVES_BD.COMENTARIOS, comentarios);
-                return nuevoComentario;
-            }
-        } catch (error) {
-            console.error('Error de conexión con PHP:', error);
-            // Fallback a local para que la UI no se rompa si no hay servidor PHP
-            const comentarios = obtener(CLAVES_BD.COMENTARIOS);
-            const nuevoComentario = { ...comentario, id: uuidv4(), fecha: new Date().toISOString() };
-            comentarios.push(nuevoComentario);
-            establecer(CLAVES_BD.COMENTARIOS, comentarios);
-            return nuevoComentario;
-        }
+        const response = await fetch(`${API_BASE}/comentarios.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...comentario,
+                fecha: new Date().toISOString()
+            })
+        });
+        return handleResponse(response);
     }
 };

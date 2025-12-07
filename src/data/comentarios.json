@@ -7,10 +7,10 @@
     "fecha": "2025-12-03T04:24:45.332Z"
   },
   {
-    "nombre": "Nuevo",
-    "email": "correo@gmail.com",
-    "comentarios": "Esta e suna prueba para ver si funciona la db",
-    "id": "6256bc2a-b778-4be1-a932-d63d4e27ef32",
-    "fecha": "2025-12-07T05:12:12.891Z"
+    "nombre": "Prueba",
+    "email": "PRueba@example.com",
+    "comentarios": "esta es una prueba",
+    "id": "45cd21cf-c93f-4451-9cdc-8540e5237534",
+    "fecha": "2025-12-07T05:25:19.247Z"
   }
 ]
