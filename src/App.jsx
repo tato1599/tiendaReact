@@ -11,6 +11,7 @@ import DetalleProducto from './pages/DetalleProducto';
 import Carrito from './pages/Carrito';
 import QuienesSomos from './pages/QuienesSomos';
 import UbicacionContacto from './pages/UbicacionContacto';
+import AdminContactos from './pages/AdminContactos';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="/registro" element={<Registro />} />
               <Route path="/quienes-somos" element={<QuienesSomos />} />
               <Route path="/ubicacion-contacto" element={<UbicacionContacto />} />
+              <Route path="/admin-contactos" element={<AdminContactos />} />
             </Routes>
             <Footer />
           </div>

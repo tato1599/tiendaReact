@@ -194,11 +194,57 @@ export const bd = {
     },
 
     // Comentarios
+    // Comentarios
     guardarComentario: async (comentario) => {
+        // Opción 1: Guardar localmente (Original)
+        /*
         const comentarios = obtener(CLAVES_BD.COMENTARIOS);
         const nuevoComentario = { ...comentario, id: uuidv4(), fecha: new Date().toISOString() };
         comentarios.push(nuevoComentario);
         establecer(CLAVES_BD.COMENTARIOS, comentarios);
         return nuevoComentario;
+        */
+
+        // Opción 2: Conexión con Backend PHP (Base de Datos MySQL)
+        // Asegúrate de que tu servidor PHP esté corriendo y la ruta sea correcta.
+        // Ejemplo: http://localhost/tiendaReact/tienda/backend/guardar_contacto.php
+        // O si usas el servidor interno de PHP en el puerto 8000: http://localhost:8000/guardar_contacto.php
+
+        try {
+            const response = await fetch('http://localhost:8000/guardar_contacto.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(comentario)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                return data;
+            } else {
+                // Si falla el servidor, lanzar error o usar fallback
+                console.warn('Error del backend PHP:', data.message);
+                // Fallback a local si se desea:
+                const comentarios = obtener(CLAVES_BD.COMENTARIOS);
+                const nuevoComentario = { ...comentario, id: uuidv4(), fecha: new Date().toISOString() };
+                comentarios.push(nuevoComentario);
+                establecer(CLAVES_BD.COMENTARIOS, comentarios);
+                return nuevoComentario;
+            }
+        } catch (error) {
+            console.error('Error de conexión con PHP:', error);
+            // Fallback a local para que la UI no se rompa si no hay servidor PHP
+            const comentarios = obtener(CLAVES_BD.COMENTARIOS);
+            const nuevoComentario = { ...comentario, id: uuidv4(), fecha: new Date().toISOString() };
+            comentarios.push(nuevoComentario);
+            establecer(CLAVES_BD.COMENTARIOS, comentarios);
+            return nuevoComentario;
+        }
     }
 };
