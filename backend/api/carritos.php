@@ -36,6 +36,15 @@ if ($method === 'GET') {
     // Agregar/Actualizar item (Action: add) o Vaciar
     $action = $_GET['action'] ?? 'add';
 
+    // Validar que el usuario exista realmente en la BD
+    $stmtUser = $pdo->prepare("SELECT id FROM usuarios WHERE id = ?");
+    $stmtUser->execute([$userId]);
+    if (!$stmtUser->fetch()) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Usuario no encontrado. Su sesión puede ser inválida.']);
+        exit;
+    }
+
     ensureCartExists($pdo, $userId);
 
     if ($action === 'add') {
@@ -93,7 +102,17 @@ if ($method === 'GET') {
 
 function ensureCartExists($pdo, $userId)
 {
-    $stmt = $pdo->prepare("INSERT IGNORE INTO carritos (user_id) VALUES (?)");
-    $stmt->execute([$userId]);
+    try {
+        $stmt = $pdo->prepare("INSERT IGNORE INTO carritos (user_id) VALUES (?)");
+        $stmt->execute([$userId]);
+    } catch (PDOException $e) {
+        // Si falla por foreign key (usuario no existe), retornamos error 400
+        if ($e->getCode() == '23000') {
+            http_response_code(400);
+            echo json_encode(['error' => 'Usuario no válido o no encontrado. Por favor inicie sesión nuevamente.']);
+            exit;
+        }
+        throw $e;
+    }
 }
 ?>

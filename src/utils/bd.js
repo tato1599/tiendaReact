@@ -12,11 +12,11 @@ const handleResponse = async (response) => {
 
 export const bd = {
     iniciarBD: () => {
-        // Ya no es necesario inicializar localstorage
+
         console.log('Sistema conectado a BD MySQL vía API PHP');
     },
 
-    // Autenticación
+
     iniciarSesion: async (email, password) => {
         const response = await fetch(`${API_BASE}/usuarios.php?action=login`, {
             method: 'POST',
@@ -40,7 +40,7 @@ export const bd = {
         return handleResponse(response);
     },
 
-    // Productos
+
     obtenerProductos: async () => {
         const response = await fetch(`${API_BASE}/productos.php`);
         return handleResponse(response);
@@ -51,7 +51,7 @@ export const bd = {
         return handleResponse(response);
     },
 
-    // Carrito
+
     obtenerCarrito: async (usuarioId) => {
         const response = await fetch(`${API_BASE}/carritos.php?userId=${usuarioId}`);
         return handleResponse(response);
@@ -62,7 +62,7 @@ export const bd = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                productId,
+                productId: productoId,
                 quantity: cantidad
             })
         });
@@ -83,7 +83,7 @@ export const bd = {
         return handleResponse(response);
     },
 
-    // Ordenes
+
     crearOrden: async (usuarioId) => {
         const response = await fetch(`${API_BASE}/ordenes.php?userId=${usuarioId}`, {
             method: 'POST',
@@ -100,7 +100,7 @@ export const bd = {
         return handleResponse(response);
     },
 
-    // Comentarios
+
     guardarComentario: async (comentario) => {
         const response = await fetch(`${API_BASE}/comentarios.php`, {
             method: 'POST',

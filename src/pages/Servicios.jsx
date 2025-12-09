@@ -48,7 +48,7 @@ const Servicios = () => {
                     </p>
                 </div>
 
-                {/* Filtros y Búsqueda */}
+
                 <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="relative w-full md:w-96">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -77,7 +77,7 @@ const Servicios = () => {
                     </div>
                 </div>
 
-                {/* Lista de Servicios */}
+
                 <div className="mt-12 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                     {productosFiltrados.map((producto) => (
                         <div key={producto.id} className="flex flex-col rounded-lg shadow-lg overflow-hidden bg-white dark:bg-gray-800 hover:shadow-xl transition-shadow duration-300">

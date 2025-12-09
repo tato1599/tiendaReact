@@ -16,7 +16,7 @@ const UbicacionContacto = () => {
             ...formData,
             [name]: value
         });
-        // Limpiar error al escribir
+
         if (errors[name]) {
             setErrors({
                 ...errors,
@@ -54,7 +54,7 @@ const UbicacionContacto = () => {
         }
     };
 
-    // Event Handlers demostrativos
+
     const handleFocus = (e) => console.log(`Focus en: ${e.target.name}`);
     const handleBlur = (e) => console.log(`Blur en: ${e.target.name}`);
     const handleMouseOver = (e) => console.log('Mouse Over formulario');
@@ -65,7 +65,7 @@ const UbicacionContacto = () => {
             <h1 className="text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white">Ubicación y Contacto</h1>
 
             <div className="grid md:grid-cols-2 gap-8">
-                {/* Sección de Ubicación */}
+
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                     <h2 className="text-2xl font-semibold mb-6 text-indigo-600 dark:text-indigo-400">Nuestra Ubicación</h2>
                     <div className="space-y-4 text-gray-600 dark:text-gray-300">
@@ -98,7 +98,7 @@ const UbicacionContacto = () => {
                     </div>
                 </div>
 
-                {/* Sección de Contacto */}
+
                 <div
                     className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
                     onMouseOver={handleMouseOver}

@@ -10,6 +10,12 @@ if ($method === 'GET') {
         $stmt = $pdo->prepare("SELECT * FROM productos WHERE id = ?");
         $stmt->execute([$_GET['id']]);
         $producto = $stmt->fetch();
+
+        if ($producto) {
+            $producto['id'] = (int) $producto['id'];
+            $producto['price'] = (float) $producto['price'];
+        }
+
         echo json_encode($producto ?: null);
     } else {
         $stmt = $pdo->query("SELECT * FROM productos");

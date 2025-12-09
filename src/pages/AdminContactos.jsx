@@ -7,7 +7,7 @@ const AdminContactos = () => {
 
     const fetchContactos = async () => {
         try {
-            // Asegúrate de que el puerto coincida con donde estés corriendo PHP (ej: 8000)
+
             const response = await fetch('http://localhost:8000/listar_contactos.php');
             const result = await response.json();
 
@@ -19,7 +19,7 @@ const AdminContactos = () => {
         } catch (err) {
             console.error(err);
             setError('Error de conexión con el servidor PHP. Asegúrate de ejecutar: php -S localhost:8000 -t backend');
-            // Fallback para visualización si no hay server
+
             setContactos([
                 { id: 1, nombre: 'Juan Pérez (Demo)', email: 'juan@test.com', comentarios: 'Este es un dato de prueba porque falló la conexión.', fecha: '2023-12-06 12:00:00' }
             ]);

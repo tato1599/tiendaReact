@@ -77,7 +77,7 @@ const BarraNavegacion = () => {
                                     </ul>
                                 </div>
 
-                                {/* Menú Móvil */}
+
                                 {menuAbierto && (
                                     <div className="lg:hidden absolute top-16 left-0 right-0 z-50 mt-2 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg mx-4">
                                         <ul className="flex flex-col gap-4">
@@ -151,7 +151,7 @@ const BarraNavegacion = () => {
                                                 </svg>
                                             </button>
 
-                                            {/* Menú Desplegable */}
+
                                             {perfilAbierto && (
                                                 <>
                                                     <div className="fixed inset-0 z-40" onClick={() => setPerfilAbierto(false)}></div>
