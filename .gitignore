@@ -23,4 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-
+# archivo db en backend
+backend/db.php
