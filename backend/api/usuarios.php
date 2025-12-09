@@ -9,8 +9,20 @@ $data = json_decode(file_get_contents('php://input'), true);
 if ($method === 'POST') {
     if (isset($_GET['action'])) {
         if ($_GET['action'] === 'login') {
-            $email = $data['email'] ?? '';
+            $email = trim($data['email'] ?? '');
             $password = $data['password'] ?? '';
+
+            if (empty($email) || empty($password)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Email y contraseña son obligatorios']);
+                exit;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Formato de email inválido']);
+                exit;
+            }
 
             $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
             $stmt->execute([$email]);
@@ -31,12 +43,29 @@ if ($method === 'POST') {
                 echo json_encode(['success' => false, 'message' => 'Credenciales inválidas']);
             }
         } elseif ($_GET['action'] === 'register') {
-            $name = $data['name'] ?? '';
-            $email = $data['email'] ?? '';
+            $name = trim($data['name'] ?? '');
+            $email = trim($data['email'] ?? '');
             $password = $data['password'] ?? '';
             $id = $data['id'] ?? uniqid();
 
-            // Verificar si existe
+            if (empty($name) || empty($email) || empty($password)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Todos los campos son obligatorios']);
+                exit;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Formato de email inválido']);
+                exit;
+            }
+
+            if (strlen($password) < 6) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'La contraseña debe tener al menos 6 caracteres']);
+                exit;
+            }
+
             $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email = ?");
             $stmt->execute([$email]);
             if ($stmt->fetch()) {
@@ -62,7 +91,7 @@ if ($method === 'POST') {
                 http_response_code(500);
                 $errorInfo = $stmt->errorInfo();
                 error_log("Error en registro: " . print_r($errorInfo, true));
-                echo json_encode(['success' => false, 'message' => 'Error al registrar: ' . $e->getMessage() . ' ' . ($errorInfo[2] ?? '')]);
+                echo json_encode(['success' => false, 'message' => 'Error al registrar: ' . $e->getMessage()]);
             }
         }
     }
