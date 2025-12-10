@@ -118,6 +118,11 @@ export const bd = {
         return handleResponse(response);
     },
 
+    obtenerComentarios: async () => {
+        const response = await fetch(`${API_BASE}/comentarios.php`);
+        return handleResponse(response);
+    },
+
     actualizarPerfil: async (id, datos) => {
         const response = await fetch(`${API_BASE}/perfil.php`, {
             method: 'PUT',

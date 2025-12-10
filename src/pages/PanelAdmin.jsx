@@ -25,6 +25,8 @@ const PanelAdmin = () => {
         }
     }, [estaAutenticado, usuario, cargando, navigate]);
 
+    const [comentarios, setComentarios] = useState([]);
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -37,9 +39,13 @@ const PanelAdmin = () => {
                 } else {
                     setError('Error al cargar estadísticas: ' + result.message);
                 }
+
+                const comentariosData = await bd.obtenerComentarios();
+                setComentarios(comentariosData);
+
             } catch (err) {
                 console.error(err);
-                setError('Error de conexión al cargar estadísticas.');
+                setError('Error de conexión al cargar datos.');
             } finally {
                 setLoadingData(false);
             }
@@ -261,6 +267,50 @@ const PanelAdmin = () => {
                                 <tr>
                                     <td colSpan="5" className="text-center py-4 text-gray-500 dark:text-gray-400">
                                         No hay órdenes recientes.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Sección de Comentarios */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mt-8">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Comentarios Recientes de Usuarios</h3>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full leading-normal">
+                        <thead>
+                            <tr>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Comentario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {comentarios.map((comentario, index) => (
+                                <tr key={comentario.id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm whitespace-nowrap text-gray-900 dark:text-white">
+                                        {comentario.fecha}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-900 dark:text-white">
+                                        {comentario.nombre}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-500 dark:text-gray-400">
+                                        {comentario.email}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300">
+                                        {comentario.comentarios}
+                                    </td>
+                                </tr>
+                            ))}
+                            {comentarios.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" className="text-center py-4 text-gray-500 dark:text-gray-400">
+                                        No hay comentarios registrados.
                                     </td>
                                 </tr>
                             )}

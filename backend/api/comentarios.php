@@ -6,23 +6,23 @@ require_once '../db.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents('php://input'), true);
 
-if ($method === 'GET') {
+if ($method === 'GET') { // Aqui se valida que el metodo sea GET
     $stmt = $pdo->query("SELECT * FROM comentarios ORDER BY fecha DESC");
     echo json_encode($stmt->fetchAll());
-} elseif ($method === 'POST') {
+} elseif ($method === 'POST') { // Aqui se valida que el metodo sea POST
     $id = $data['id'] ?? uniqid();
     $nombre = trim($data['nombre'] ?? '');
     $email = trim($data['email'] ?? '');
     $comentarios = trim($data['comentarios'] ?? '');
     $fecha = $data['fecha'] ?? date('Y-m-d H:i:s');
 
-    if (empty($nombre) || empty($email) || empty($comentarios)) {
+    if (empty($nombre) || empty($email) || empty($comentarios)) { // Aqui se valida que todos los campos esten llenos
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Todos los campos son obligatorios']);
         exit;
     }
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { // Aqui se usa la constante FILTER_VALIDATE_EMAIL para validar el email
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Formato de email inválido']);
         exit;
