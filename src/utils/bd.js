@@ -120,5 +120,14 @@ export const bd = {
             body: JSON.stringify({ id, ...datos })
         });
         return handleResponse(response);
+    },
+
+    crearProducto: async (formData) => {
+        const response = await fetch(`${API_BASE}/productos.php`, {
+            method: 'POST',
+            // No set Content-Type header when sending FormData, fetch does it automatically with boundary
+            body: formData
+        });
+        return handleResponse(response);
     }
 };
