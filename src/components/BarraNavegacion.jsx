@@ -85,6 +85,9 @@ const BarraNavegacion = () => {
                                             <li><Link to="/servicios" className="text-gray-900 dark:text-white font-medium" onClick={() => setMenuAbierto(false)}>Servicios</Link></li>
                                             <li><Link to="/quienes-somos" className="text-gray-900 dark:text-white font-medium" onClick={() => setMenuAbierto(false)}>Quiénes Somos</Link></li>
                                             <li><Link to="/ubicacion-contacto" className="text-gray-900 dark:text-white font-medium" onClick={() => setMenuAbierto(false)}>Contacto</Link></li>
+                                            {estaAutenticado && usuario?.role === 'admin' && (
+                                                <li><Link to="/panel-admin" className="text-blue-600 dark:text-blue-400 font-bold" onClick={() => setMenuAbierto(false)}>Panel Admin</Link></li>
+                                            )}
 
                                             {estaAutenticado && (
                                                 <>
@@ -137,6 +140,12 @@ const BarraNavegacion = () => {
                                             </svg>
                                         )}
                                     </button>
+
+                                    {estaAutenticado && usuario?.role === 'admin' && (
+                                        <Link to="/panel-admin" className="p-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg mr-2 font-medium" title="Panel de Administración">
+                                            Admin
+                                        </Link>
+                                    )}
 
                                     {estaAutenticado ? (
                                         <div className="relative ms-4">

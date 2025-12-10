@@ -12,6 +12,7 @@ import Carrito from './pages/Carrito';
 import QuienesSomos from './pages/QuienesSomos';
 import UbicacionContacto from './pages/UbicacionContacto';
 import AdminContactos from './pages/AdminContactos';
+import PanelAdmin from './pages/PanelAdmin';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
               <Route path="/quienes-somos" element={<QuienesSomos />} />
               <Route path="/ubicacion-contacto" element={<UbicacionContacto />} />
               <Route path="/admin-contactos" element={<AdminContactos />} />
+              <Route path="/panel-admin" element={<PanelAdmin />} />
             </Routes>
             <Footer />
           </div>

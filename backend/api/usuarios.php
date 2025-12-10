@@ -1,5 +1,4 @@
 <?php
-// backend/api/usuarios.php
 require_once 'cors.php';
 require_once '../db.php';
 
@@ -35,7 +34,8 @@ if ($method === 'POST') {
                     'user' => [
                         'id' => $user['id'],
                         'name' => $user['name'],
-                        'email' => $user['email']
+                        'email' => $user['email'],
+                        'role' => $user['role'] ?? 'user'
                     ]
                 ]);
             } else {
@@ -75,14 +75,15 @@ if ($method === 'POST') {
             }
 
             $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+            $role = 'user';
 
-            $stmt = $pdo->prepare("INSERT INTO usuarios (id, name, email, password) VALUES (?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO usuarios (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)");
             try {
-                if ($stmt->execute([$id, $name, $email, $passwordHash])) {
+                if ($stmt->execute([$id, $name, $email, $passwordHash, $role])) {
                     echo json_encode([
                         'success' => true,
                         'token' => 'fake-jwt-token',
-                        'user' => ['id' => $id, 'name' => $name, 'email' => $email]
+                        'user' => ['id' => $id, 'name' => $name, 'email' => $email, 'role' => $role]
                     ]);
                 } else {
                     throw new Exception("Error al ejecutar insert");
