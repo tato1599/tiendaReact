@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { usarAutenticacion } from '../context/ContextoAutenticacion';
 import FormularioProducto from '../components/FormularioProducto';
 
+import { bd } from '../utils/bd';
+
 const PanelAdmin = () => {
     const { usuario, estaAutenticado, cargando } = usarAutenticacion();
     const navigate = useNavigate();
@@ -11,6 +13,11 @@ const PanelAdmin = () => {
     const [loadingData, setLoadingData] = useState(true);
     const [error, setError] = useState('');
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
+    // Estado para detalles de orden
+    const [ordenSeleccionada, setOrdenSeleccionada] = useState(null);
+    const [mostrarDetalles, setMostrarDetalles] = useState(false);
+    const [cargandoDetalles, setCargandoDetalles] = useState(false);
 
     useEffect(() => {
         if (!cargando && (!estaAutenticado || usuario?.role !== 'admin')) {
@@ -46,7 +53,27 @@ const PanelAdmin = () => {
     const handleProductoGuardado = (producto) => {
         alert(`Producto "${producto.name}" agregado correctamente.`);
         setMostrarFormulario(false);
-        // Opcional: Actualizar alguna lista si la tuviéramos visible
+    };
+
+    const verDetallesOrden = async (id) => {
+        setCargandoDetalles(true);
+        setOrdenSeleccionada(null);
+        setMostrarDetalles(true);
+        try {
+            const data = await bd.obtenerOrdenPorId(id);
+            if (data.success) {
+                setOrdenSeleccionada(data.order);
+            } else {
+                alert('No se pudieron cargar los detalles de la orden');
+                setMostrarDetalles(false);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error al cargar detalles');
+            setMostrarDetalles(false);
+        } finally {
+            setCargandoDetalles(false);
+        }
     };
 
     if (cargando || (estaAutenticado && usuario?.role === 'admin' && loadingData)) {
@@ -77,6 +104,77 @@ const PanelAdmin = () => {
                     alGuardar={handleProductoGuardado}
                     alCancelar={() => setMostrarFormulario(false)}
                 />
+            )}
+
+            {/* Modal Detalles Orden */}
+            {mostrarDetalles && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 my-8 p-6 relative">
+                        <button
+                            onClick={() => setMostrarDetalles(false)}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Detalles de Orden</h2>
+
+                        {cargandoDetalles ? (
+                            <div className="text-center py-8">Cargando detalles...</div>
+                        ) : ordenSeleccionada ? (
+                            <div>
+                                <div className="grid grid-cols-2 gap-4 mb-6 text-sm text-gray-600 dark:text-gray-300">
+                                    <p><strong>ID Orden:</strong> {ordenSeleccionada.id}</p>
+                                    <p><strong>Fecha:</strong> {ordenSeleccionada.date}</p>
+                                    <p><strong>Usuario:</strong> {ordenSeleccionada.email || 'Desconocido'}</p>
+                                    <p><strong>Total:</strong> ${ordenSeleccionada.total.toFixed(2)}</p>
+                                </div>
+
+                                <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">Productos</h3>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full leading-normal">
+                                        <thead>
+                                            <tr>
+                                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Producto</th>
+                                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Precio</th>
+                                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Cant.</th>
+                                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {ordenSeleccionada.items && ordenSeleccionada.items.map((item, index) => (
+                                                <tr key={index} className="border-b border-gray-200 dark:border-gray-700 text-sm">
+                                                    <td className="px-5 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                                        <div className="flex items-center">
+                                                            {item.image && <img src={item.image} alt={item.name} className="w-10 h-10 object-cover mr-3 rounded" />}
+                                                            <span>{item.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-5 py-3 bg-white dark:bg-gray-800 text-right text-gray-900 dark:text-white">${item.price.toFixed(2)}</td>
+                                                    <td className="px-5 py-3 bg-white dark:bg-gray-800 text-right text-gray-900 dark:text-white">{item.quantity}</td>
+                                                    <td className="px-5 py-3 bg-white dark:bg-gray-800 text-right font-semibold text-gray-900 dark:text-white">${(item.price * item.quantity).toFixed(2)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center text-red-500">Error cargando información.</div>
+                        )}
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={() => setMostrarDetalles(false)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {error && (
@@ -121,6 +219,9 @@ const PanelAdmin = () => {
                                 <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                                     Total
                                 </th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                    Acciones
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -146,11 +247,19 @@ const PanelAdmin = () => {
                                             ${parseFloat(orden.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                         </p>
                                     </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-center">
+                                        <button
+                                            onClick={() => verDetallesOrden(orden.id)}
+                                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+                                        >
+                                            Ver Detalles
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             {ordenesRecientes.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="text-center py-4 text-gray-500 dark:text-gray-400">
+                                    <td colSpan="5" className="text-center py-4 text-gray-500 dark:text-gray-400">
                                         No hay órdenes recientes.
                                     </td>
                                 </tr>

@@ -100,6 +100,11 @@ export const bd = {
         return handleResponse(response);
     },
 
+    obtenerOrdenPorId: async (id) => {
+        const response = await fetch(`${API_BASE}/ordenes.php?id=${id}`);
+        return handleResponse(response);
+    },
+
 
     guardarComentario: async (comentario) => {
         const response = await fetch(`${API_BASE}/comentarios.php`, {
@@ -125,8 +130,22 @@ export const bd = {
     crearProducto: async (formData) => {
         const response = await fetch(`${API_BASE}/productos.php`, {
             method: 'POST',
-            // No set Content-Type header when sending FormData, fetch does it automatically with boundary
             body: formData
+        });
+        return handleResponse(response);
+    },
+
+    actualizarProducto: async (formData) => {
+        const response = await fetch(`${API_BASE}/productos.php`, {
+            method: 'POST',
+            body: formData
+        });
+        return handleResponse(response);
+    },
+
+    eliminarProducto: async (id) => {
+        const response = await fetch(`${API_BASE}/productos.php?id=${id}`, {
+            method: 'DELETE'
         });
         return handleResponse(response);
     }

@@ -1,15 +1,14 @@
 <?php
-// backend/api/productos.php
 require_once 'cors.php';
 require_once '../db.php';
 
-$method = $_SERVER['REQUEST_METHOD'];
+$metodo = $_SERVER['REQUEST_METHOD'];
 
-if ($method === 'GET') {
+if ($metodo === 'GET') {
     if (isset($_GET['id'])) {
-        $stmt = $pdo->prepare("SELECT * FROM productos WHERE id = ?");
-        $stmt->execute([$_GET['id']]);
-        $producto = $stmt->fetch();
+        $sentencia = $pdo->prepare("SELECT * FROM productos WHERE id = ?");
+        $sentencia->execute([$_GET['id']]);
+        $producto = $sentencia->fetch();
 
         if ($producto) {
             $producto['id'] = (int) $producto['id'];
@@ -18,52 +17,53 @@ if ($method === 'GET') {
 
         echo json_encode($producto ?: null);
     } else {
-        $stmt = $pdo->query("SELECT * FROM productos");
-        $productos = $stmt->fetchAll();
-        // Asegurar tipos numéricos para compatibilidad
+        $sentencia = $pdo->query("SELECT * FROM productos");
+        $productos = $sentencia->fetchAll();
         foreach ($productos as &$p) {
             $p['id'] = (int) $p['id'];
             $p['price'] = (float) $p['price'];
         }
         echo json_encode($productos);
     }
-} elseif ($method === 'POST') {
-    // Manejo de creación de producto con imagen
-    $name = $_POST['name'] ?? '';
-    $description = $_POST['description'] ?? '';
-    $price = $_POST['price'] ?? 0;
-    $category = $_POST['category'] ?? '';
-    // Generar un ID numérico o usar auto-increment si la base de datos lo soporta. 
-    // Los JSONs usaban IDs numéricos manuales, aquí usaremos time() para simplicidad si no es auto-increment
-    // O mejor, dejemos que la BD maneje el ID si es AUTO_INCREMENT, si no, generamos uno.
-    $id = time();
+} elseif ($metodo === 'POST') {
+    $nombre = $_POST['name'] ?? '';
+    $descripcion = $_POST['description'] ?? '';
+    $precio = $_POST['price'] ?? 0;
+    $categoria = $_POST['category'] ?? '';
 
-    if (empty($name) || empty($price)) {
+    // Verificar si es una actualización
+    $id = isset($_POST['id']) ? $_POST['id'] : null;
+    $esActualizacion = !empty($id);
+
+    if (empty($nombre) || empty($precio)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Nombre y precio son obligatorios']);
         exit;
     }
 
-    $imagePath = '';
+    $rutaImagen = '';
+    if ($esActualizacion) {
+        // Obtener imagen actual si no se sube una nueva
+        $stmt = $pdo->prepare("SELECT image FROM productos WHERE id = ?");
+        $stmt->execute([$id]);
+        $prodActual = $stmt->fetch();
+        $rutaImagen = $prodActual['image'] ?? '';
+    }
 
-    // Manejo de subida de imagenes
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/../../public/images/';
-
-        // Asegurar que el directorio existe (aunque ya lo creamos con comando)
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+        $directorioSubida = __DIR__ . '/../../public/images/';
+        if (!is_dir($directorioSubida)) {
+            mkdir($directorioSubida, 0777, true);
         }
 
-        $fileExtension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $fileName = 'prod_' . uniqid() . '.' . $fileExtension;
-        $targetFile = $uploadDir . $fileName;
+        $extensionArchivo = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $nombreArchivo = 'prod_' . uniqid() . '.' . $extensionArchivo;
+        $archivoDestino = $directorioSubida . $nombreArchivo;
 
-        // Validar tipo de imagen
         $check = getimagesize($_FILES['image']['tmp_name']);
         if ($check !== false) {
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-                $imagePath = '/images/' . $fileName; // Ruta relativa para el frontend
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $archivoDestino)) {
+                $rutaImagen = '/images/' . $nombreArchivo;
             } else {
                 http_response_code(500);
                 echo json_encode(['success' => false, 'message' => 'Error al subir la imagen']);
@@ -74,30 +74,60 @@ if ($method === 'GET') {
             echo json_encode(['success' => false, 'message' => 'El archivo no es una imagen válida']);
             exit;
         }
-    } else {
-        // Imagen por defecto o error si es obligatoria. Asumiremos opcional o placeholder.
-        $imagePath = '/images/placeholder.jpg';
+    } elseif (!$esActualizacion) {
+        $rutaImagen = '/images/placeholder.jpg';
     }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO productos (id, name, description, price, category, image) VALUES (?, ?, ?, ?, ?, ?)");
-        if ($stmt->execute([$id, $name, $description, $price, $category, $imagePath])) {
+        if ($esActualizacion) {
+            $sentencia = $pdo->prepare("UPDATE productos SET name = ?, description = ?, price = ?, category = ?, image = ? WHERE id = ?");
+            $resultado = $sentencia->execute([$nombre, $descripcion, $precio, $categoria, $rutaImagen, $id]);
+            $mensaje = 'Producto actualizado exitosamente';
+        } else {
+            $id = time(); // O usar auto-increment si la base de datos está configurada
+            $sentencia = $pdo->prepare("INSERT INTO productos (id, name, description, price, category, image) VALUES (?, ?, ?, ?, ?, ?)");
+            $resultado = $sentencia->execute([$id, $nombre, $descripcion, $precio, $categoria, $rutaImagen]);
+            $mensaje = 'Producto creado exitosamente';
+        }
+
+        if ($resultado) {
             echo json_encode([
                 'success' => true,
-                'message' => 'Producto creado exitosamente',
+                'message' => $mensaje,
                 'product' => [
                     'id' => $id,
-                    'name' => $name,
-                    'price' => $price,
-                    'image' => $imagePath
+                    'name' => $nombre,
+                    'price' => $precio,
+                    'image' => $rutaImagen
                 ]
             ]);
         } else {
-            throw new Exception("Error al insertar en BD");
+            throw new Exception("Error en la base de datos");
         }
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    }
+} elseif ($metodo === 'DELETE') {
+    $id = $_GET['id'] ?? null;
+
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'ID es requerido para eliminar']);
+        exit;
+    }
+
+    try {
+        $sentencia = $pdo->prepare("DELETE FROM productos WHERE id = ?");
+        if ($sentencia->execute([$id])) {
+            echo json_encode(['success' => true, 'message' => 'Producto eliminado correctamente']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'No se pudo eliminar el producto']);
+        }
     } catch (Exception $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);

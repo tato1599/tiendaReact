@@ -8,26 +8,55 @@ $data = json_decode(file_get_contents('php://input'), true);
 $userId = $_GET['userId'] ?? ($data['userId'] ?? null);
 
 if ($method === 'GET') {
-    if (!$userId) {
-        http_response_code(400);
-        exit;
-    }
-    $stmt = $pdo->prepare("SELECT * FROM ordenes WHERE user_id = ? ORDER BY date DESC");
-    $stmt->execute([$userId]);
-    $ordenes = $stmt->fetchAll();
+    if (isset($_GET['id'])) {
+        // Obtener una orden específica por ID (y sus items)
+        $ordenId = $_GET['id'];
+        $stmt = $pdo->prepare("SELECT o.*, u.email FROM ordenes o LEFT JOIN usuarios u ON o.user_id = u.id WHERE o.id = ?");
+        $stmt->execute([$ordenId]);
+        $orden = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    foreach ($ordenes as &$orden) {
-        $orden['total'] = (float) $orden['total'];
-        $stmtItems = $pdo->prepare("SELECT product_id as productId, name, price, quantity, image FROM items_orden WHERE orden_id = ?");
-        $stmtItems->execute([$orden['id']]);
-        $orden['items'] = $stmtItems->fetchAll();
-        foreach ($orden['items'] as &$item) {
-            $item['productId'] = (int) $item['productId'];
-            $item['price'] = (float) $item['price'];
-            $item['quantity'] = (int) $item['quantity'];
+        if ($orden) {
+            $orden['total'] = (float) $orden['total'];
+
+            // Obtener items
+            $stmtItems = $pdo->prepare("SELECT product_id as productId, name, price, quantity, image FROM items_orden WHERE orden_id = ?");
+            $stmtItems->execute([$ordenId]);
+            $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($items as &$item) {
+                $item['productId'] = (int) $item['productId'];
+                $item['price'] = (float) $item['price'];
+                $item['quantity'] = (int) $item['quantity'];
+            }
+            $orden['items'] = $items;
+
+            echo json_encode(['success' => true, 'order' => $orden]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Orden no encontrada']);
         }
+    } elseif ($userId) {
+        // Obtener historial de ordenes de un usuario
+        $stmt = $pdo->prepare("SELECT * FROM ordenes WHERE user_id = ? ORDER BY date DESC");
+        $stmt->execute([$userId]);
+        $ordenes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($ordenes as &$orden) {
+            $orden['total'] = (float) $orden['total'];
+            $stmtItems = $pdo->prepare("SELECT product_id as productId, name, price, quantity, image FROM items_orden WHERE orden_id = ?");
+            $stmtItems->execute([$orden['id']]);
+            $orden['items'] = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($orden['items'] as &$item) {
+                $item['productId'] = (int) $item['productId'];
+                $item['price'] = (float) $item['price'];
+                $item['quantity'] = (int) $item['quantity'];
+            }
+        }
+        echo json_encode($ordenes);
+    } else {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Faltan parametros (id o userId)']);
     }
-    echo json_encode($ordenes);
 
 } elseif ($method === 'POST') {
     // Crear orden desde carrito

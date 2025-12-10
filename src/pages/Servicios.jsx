@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { bd } from '../utils/bd';
+import FormularioProducto from '../components/FormularioProducto';
+import { usarAutenticacion } from '../context/ContextoAutenticacion';
 import './Servicios.css';
 
 const Servicios = () => {
@@ -8,6 +10,42 @@ const Servicios = () => {
     const [filtroCategoria, setFiltroCategoria] = useState('Todos');
     const [productos, setProductos] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const { usuario } = usarAutenticacion();
+    const esAdmin = usuario?.role === 'admin';
+    const [mostrarFormulario, setMostrarFormulario] = useState(false);
+    const [productoAEditar, setProductoAEditar] = useState(null);
+
+    const handleEliminar = async (id) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
+            try {
+                await bd.eliminarProducto(id);
+                setProductos(productos.filter(p => p.id !== id));
+            } catch (error) {
+                console.error('Error al eliminar:', error);
+                alert('No se pudo eliminar el servicio');
+            }
+        }
+    };
+
+    const handleEditar = (producto) => {
+        setProductoAEditar(producto);
+        setMostrarFormulario(true);
+    };
+
+    const handleGuardar = (productoGuardado) => {
+        if (productoAEditar) {
+            setProductos(productos.map(p => p.id === productoGuardado.id ? productoGuardado : p));
+        } else {
+            setProductos([...productos, productoGuardado]);
+        }
+        setMostrarFormulario(false);
+        setProductoAEditar(null);
+    };
+
+    const handleCancelar = () => {
+        setMostrarFormulario(false);
+        setProductoAEditar(null);
+    };
 
     useEffect(() => {
         const cargarProductos = async () => {
@@ -109,6 +147,22 @@ const Servicios = () => {
                                         Ver detalles
                                     </Link>
                                 </div>
+                                {esAdmin && (
+                                    <div className="mt-4 flex gap-2 justify-end border-t pt-4 dark:border-gray-700">
+                                        <button
+                                            onClick={() => handleEditar(producto)}
+                                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            onClick={() => handleEliminar(producto.id)}
+                                            className="text-red-600 hover:text-red-800 font-medium text-sm"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -120,6 +174,13 @@ const Servicios = () => {
                     </div>
                 )}
             </div>
+            {mostrarFormulario && (
+                <FormularioProducto
+                    producto={productoAEditar}
+                    alGuardar={handleGuardar}
+                    alCancelar={handleCancelar}
+                />
+            )}
         </div>
     );
 };

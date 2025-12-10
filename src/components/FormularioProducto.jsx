@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { bd } from '../utils/bd';
 
-const FormularioProducto = ({ alGuardar, alCancelar }) => {
-    const [nombre, setNombre] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [precio, setPrecio] = useState('');
-    const [categoria, setCategoria] = useState('');
+const FormularioProducto = ({ alGuardar, alCancelar, producto = null }) => {
+    const [nombre, setNombre] = useState(producto ? producto.name : '');
+    const [descripcion, setDescripcion] = useState(producto ? producto.description : '');
+    const [precio, setPrecio] = useState(producto ? producto.price : '');
+    const [categoria, setCategoria] = useState(producto ? producto.category : '');
     const [imagen, setImagen] = useState(null);
-    const [preview, setPreview] = useState(null);
+    const [preview, setPreview] = useState(producto ? producto.image : null);
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState('');
 
@@ -33,8 +33,13 @@ const FormularioProducto = ({ alGuardar, alCancelar }) => {
             if (imagen) {
                 formData.append('image', imagen);
             }
+            if (producto) {
+                formData.append('id', producto.id);
+            }
 
-            const resultado = await bd.crearProducto(formData);
+            const resultado = producto
+                ? await bd.actualizarProducto(formData)
+                : await bd.crearProducto(formData);
 
             if (resultado.success) {
                 alGuardar(resultado.product);
@@ -61,7 +66,9 @@ const FormularioProducto = ({ alGuardar, alCancelar }) => {
                     </svg>
                 </button>
 
-                <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Nuevo Producto</h2>
+                <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+                    {producto ? 'Editar Producto' : 'Nuevo Producto'}
+                </h2>
 
                 {error && (
                     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">

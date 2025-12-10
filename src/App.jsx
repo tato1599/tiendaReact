@@ -14,6 +14,7 @@ import UbicacionContacto from './pages/UbicacionContacto';
 import AdminContactos from './pages/AdminContactos';
 import PanelAdmin from './pages/PanelAdmin';
 import PerfilUsuario from './pages/PerfilUsuario';
+import MisOrdenes from './pages/MisOrdenes';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               <Route path="/admin-contactos" element={<AdminContactos />} />
               <Route path="/panel-admin" element={<PanelAdmin />} />
               <Route path="/perfil" element={<PerfilUsuario />} />
+              <Route path="/mis-ordenes" element={<MisOrdenes />} />
             </Routes>
             <Footer />
           </div>
