@@ -111,5 +111,14 @@ export const bd = {
             })
         });
         return handleResponse(response);
+    },
+
+    actualizarPerfil: async (id, datos) => {
+        const response = await fetch(`${API_BASE}/perfil.php`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...datos })
+        });
+        return handleResponse(response);
     }
 };

@@ -177,9 +177,9 @@ const BarraNavegacion = () => {
                                                                     {usuario?.email}
                                                                 </p>
                                                             </div>
-                                                            <button className="mb-2 me-2 block w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-700">
+                                                            <Link to="/perfil" onClick={() => setPerfilAbierto(false)} className="mb-2 me-2 block w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-center text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-700">
                                                                 Ver Perfil
-                                                            </button>
+                                                            </Link>
                                                         </div>
                                                         <ul className="p-2 text-start text-sm font-medium text-gray-900 dark:text-white">
                                                             <li>
